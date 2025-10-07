@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}{{ collection.name }} - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-cash-stack"></i> {{ collection.name }}</h1>
+            <p class="text-muted">{{ class_obj.name }} | Amount: ${{ collection.amount_per_student }}</p>
+        </div>
+        {% if current_user.can_manage_class() %}
+        <div class="col-auto">
+            <a href="{{ url_for('finance.export_collection', collection_id=collection.id) }}" class="btn btn-success">
+                <i class="bi bi-download"></i> Export CSV
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #198754;">
+                <h3 class="text-success">{{ payment_status.paid }}</h3>
+                <p>Paid</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #dc3545;">
+                <h3 class="text-danger">{{ payment_status.unpaid }}</h3>
+                <p>Unpaid</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #0d6efd;">
+                <h3 class="text-primary">${{ payment_status.total_collected }}</h3>
+                <p>Collected</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #6c757d;">
+                <h3 class="text-secondary">${{ payment_status.expected_total }}</h3>
+                <p>Expected Total</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Payment Records -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student Name</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Payment Date</th>
+                            {% if current_user.can_manage_class() %}
+                            <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in finance_records %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ record.student.full_name }}</td>
+                            <td>${{ record.amount }}</td>
+                            <td>
+                                {% if record.paid %}
+                                <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                <span class="badge bg-danger">Unpaid</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ record.payment_date.strftime('%b %d, %Y') if record.payment_date else '-' }}</td>
+                            {% if current_user.can_manage_class() %}
+                            <td>
+                                <button onclick="togglePayment({{ record.student_id }}, {{ 'false' if record.paid else 'true' }})" 
+                                        class="btn btn-sm btn-outline-{{ 'warning' if record.paid else 'success' }}">
+                                    {% if record.paid %}
+                                    <i class="bi bi-x-circle"></i> Mark Unpaid
+                                    {% else %}
+                                    <i class="bi bi-check-circle"></i> Mark Paid
+                                    {% endif %}
+                                </button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if current_user.can_manage_class() %}
+<script>
+function togglePayment(studentId, paid) {
+    fetch('{{ url_for("finance.mark_paid", collection_id=collection.id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'student_id=' + studentId + '&paid=' + paid
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+}
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Finance - {{ class_obj.name }} - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-cash-stack"></i> Financial Collections - {{ class_obj.name }}</h1>
+        </div>
+        {% if current_user.can_manage_class() %}
+        <div class="col-auto">
+            <a href="{{ url_for('finance.create_collection', class_id=class_obj.id) }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create Collection
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if collections %}
+    <div class="row">
+        {% for collection in collections %}
+        {% set status = collection.get_payment_status() %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5>{{ collection.name }}</h5>
+                            <p class="text-muted mb-0">Amount: ${{ collection.amount_per_student }} per student</p>
+                        </div>
+                        <span class="badge bg-{{ 'success' if collection.is_active else 'secondary' }}">
+                            {{ 'Active' if collection.is_active else 'Inactive' }}
+                        </span>
+                    </div>
+                    
+                    {% if collection.description %}
+                    <p class="text-muted">{{ collection.description }}</p>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small>Payment Progress</small>
+                            <small>{{ status.paid }}/{{ status.total_students }} paid</small>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: {{ (status.paid / status.total_students * 100) if status.total_students > 0 else 0 }}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>Collected: ${{ status.total_collected }}</strong><br>
+                            <small class="text-muted">Expected: ${{ status.expected_total }}</small>
+                        </div>
+                        <a href="{{ url_for('finance.view_collection', collection_id=collection.id) }}" class="btn btn-sm btn-outline-primary">
+                            View Details <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-wallet2" style="font-size: 4rem; color: #ccc;"></i>
+        <h4 class="mt-3">No collections yet</h4>
+        {% if current_user.can_manage_class() %}
+        <p class="text-muted">Create a collection to start tracking payments</p>
+        <a href="{{ url_for('finance.create_collection', class_id=class_obj.id) }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Create Collection
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

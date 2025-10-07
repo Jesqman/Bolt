@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Payments - {{ student.full_name }} - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-wallet2"></i> {{ student.full_name }}</h1>
+            <p class="text-muted">Payment Records</p>
+        </div>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stat-card" style="border-left-color: #0d6efd;">
+                <h3 class="text-primary">${{ total_amount }}</h3>
+                <p>Total Amount</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="border-left-color: #198754;">
+                <h3 class="text-success">${{ paid_amount }}</h3>
+                <p>Paid</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="border-left-color: #dc3545;">
+                <h3 class="text-danger">${{ unpaid_amount }}</h3>
+                <p>Outstanding</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Payment Records -->
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Payment History</h5>
+        </div>
+        <div class="card-body">
+            {% if finance_records %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Collection</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Payment Date</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in finance_records %}
+                        <tr>
+                            <td>{{ record.collection_name }}</td>
+                            <td>${{ record.amount }}</td>
+                            <td>
+                                {% if record.paid %}
+                                <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                <span class="badge bg-danger">Unpaid</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ record.payment_date.strftime('%b %d, %Y') if record.payment_date else '-' }}</td>
+                            <td>{{ record.notes or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-3">No payment records yet</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
