@@ -10,7 +10,7 @@ class Finance(db.Model):
     class_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=False)
     collection_name = db.Column(db.String(200), nullable=False)  # e.g., "Textbooks", "School Trip"
     description = db.Column(db.Text)
-    amount = db.Column(db.Decimal(10, 2), nullable=False)  # Expected amount per student
+    amount = db.Column(db.Numeric(10, 2), nullable=False)  # Expected amount per student
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     paid = db.Column(db.Boolean, default=False)
     payment_date = db.Column(db.DateTime)
@@ -53,7 +53,7 @@ class Collection(db.Model):
     class_id = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
-    amount_per_student = db.Column(db.Decimal(10, 2), nullable=False)
+    amount_per_student = db.Column(db.Numeric(10, 2), nullable=False)
     due_date = db.Column(db.DateTime)
     is_active = db.Column(db.Boolean, default=True)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

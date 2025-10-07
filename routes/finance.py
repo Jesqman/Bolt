@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, Response
 from flask_login import current_user
 from datetime import datetime
-from decimal import Decimal
 import io
 import csv
 
@@ -65,7 +64,7 @@ def create_collection(class_id):
             return render_template('finance/create_collection.html', class_obj=class_obj)
         
         try:
-            amount = Decimal(amount_per_student)
+            amount = float(amount_per_student)
             if amount <= 0:
                 raise ValueError('Amount must be positive')
         except (ValueError, TypeError):
