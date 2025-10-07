@@ -49,6 +49,10 @@ instance/
 *.sqlite
 *.sqlite3
 
+# SQLite database (except example)
+classhub.db
+instance/
+
 # Uploads
 uploads/*
 !uploads/.gitkeep
