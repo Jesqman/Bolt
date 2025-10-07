@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Add Student - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0"><i class="bi bi-person-plus"></i> Add Student to {{ class_obj.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Students must register with Google first before you can add them to a class.
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Student Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" required placeholder="student@example.com">
+                            <small class="text-muted">Enter the student's registered email address</small>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus"></i> Add Student
+                            </button>
+                            <a href="{{ url_for('classes.students', class_id=class_obj.id) }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

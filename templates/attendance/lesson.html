@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance - {{ lesson.subject }} - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-check2-square"></i> Mark Attendance</h1>
+            <h4>{{ lesson.subject }} - {{ lesson.date.strftime('%B %d, %Y') }}</h4>
+            <p class="text-muted">{{ lesson.start_time.strftime('%H:%M') }} - {{ lesson.end_time.strftime('%H:%M') }} | {{ class_obj.name }}</p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('attendance.bulk_mark_attendance', lesson_id=lesson.id) }}">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Student Name</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            {% set attendance = attendance_dict.get(student.id) %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    {% if student.profile_picture %}
+                                    <img src="{{ student.profile_picture }}" alt="{{ student.full_name }}" class="rounded-circle me-2" width="32" height="32">
+                                    {% endif %}
+                                    {{ student.full_name }}
+                                </td>
+                                <td>
+                                    <select name="status_{{ student.id }}" class="form-select">
+                                        <option value="">Not marked</option>
+                                        <option value="present" {% if attendance and attendance.status == 'present' %}selected{% endif %}>Present</option>
+                                        <option value="late" {% if attendance and attendance.status == 'late' %}selected{% endif %}>Late</option>
+                                        <option value="absent" {% if attendance and attendance.status == 'absent' %}selected{% endif %}>Absent</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" name="notes_{{ student.id }}" class="form-control" placeholder="Optional notes" value="{{ attendance.notes if attendance else '' }}">
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if current_user.can_manage_class() %}
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Attendance
+                    </button>
+                    <a href="{{ url_for('attendance.class_attendance', class_id=class_obj.id) }}" class="btn btn-secondary">Cancel</a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

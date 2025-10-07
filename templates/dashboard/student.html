@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="mb-3">
+                <i class="bi bi-book"></i> Student Dashboard
+            </h1>
+            <p class="text-muted">Welcome back, {{ current_user.full_name }}!</p>
+        </div>
+    </div>
+    
+    {% if not class_obj %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> You are not assigned to any class yet. Please contact your teacher.
+    </div>
+    {% else %}
+    
+    <!-- Class Info -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5><i class="bi bi-people-fill"></i> {{ class_obj.name }}</h5>
+                    <p class="text-muted mb-0">Academic Year: {{ class_obj.academic_year }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #0d6efd;">
+                <h3 class="text-primary">{{ total_lessons }}</h3>
+                <p>Total Lessons</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #198754;">
+                <h3 class="text-success">{{ present_count }}</h3>
+                <p>Present</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #ffc107;">
+                <h3 class="text-warning">{{ late_count }}</h3>
+                <p>Late</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: #dc3545;">
+                <h3 class="text-danger">{{ absent_count }}</h3>
+                <p>Absent</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Upcoming Lessons -->
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Upcoming Lessons</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_lessons %}
+                    <div class="list-group list-group-flush">
+                        {% for lesson in upcoming_lessons %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ lesson.subject }}</h6>
+                                <small class="text-muted">{{ lesson.date.strftime('%b %d, %Y') }}</small>
+                            </div>
+                            <p class="mb-1">
+                                <i class="bi bi-clock"></i> {{ lesson.start_time.strftime('%H:%M') }} - {{ lesson.end_time.strftime('%H:%M') }}
+                                {% if lesson.location %}
+                                <span class="ms-3"><i class="bi bi-geo-alt"></i> {{ lesson.location }}</span>
+                                {% endif %}
+                            </p>
+                            {% if lesson.description %}
+                            <small class="text-muted">{{ lesson.description }}</small>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-4">No upcoming lessons scheduled</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pending Payments -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-wallet2"></i> Pending Payments</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_payments %}
+                    <div class="list-group list-group-flush">
+                        {% for payment in pending_payments %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ payment.collection_name }}</h6>
+                                <span class="badge bg-danger">${{ payment.amount }}</span>
+                            </div>
+                            {% if payment.description %}
+                            <small class="text-muted">{{ payment.description }}</small>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3">
+                        <strong>Total Due: ${{ pending_payments|sum(attribute='amount') }}</strong>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">No pending payments</p>
+                    <div class="text-center">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                        <p class="mt-2">All caught up!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card mt-3">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('schedule.class_schedule', class_id=class_obj.id) }}" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bi bi-calendar"></i> View Full Schedule
+                    </a>
+                    <a href="{{ url_for('attendance.student_attendance', student_id=current_user.id) }}" class="btn btn-outline-success w-100">
+                        <i class="bi bi-graph-up"></i> My Attendance
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+{% endblock %}

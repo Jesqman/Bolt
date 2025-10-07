@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}{{ class_obj.name }} - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-people-fill"></i> {{ class_obj.name }}</h1>
+            <p class="text-muted">{{ class_obj.academic_year }} | Teacher: {{ class_obj.teacher.full_name }}</p>
+        </div>
+        {% if current_user.is_teacher() and class_obj.teacher_id == current_user.id %}
+        <div class="col-auto">
+            <a href="{{ url_for('classes.edit', class_id=class_obj.id) }}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil"></i> Edit Class
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2 class="text-primary">{{ students|length }}</h2>
+                    <p class="text-muted mb-0">Students</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2 class="text-success">{{ class_obj.lessons|length }}</h2>
+                    <p class="text-muted mb-0">Lessons</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if starosta %}
+                    <h5>{{ starosta.full_name }}</h5>
+                    <p class="text-muted mb-0">Starosta</p>
+                    {% else %}
+                    <p class="text-muted">No starosta assigned</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('classes.students', class_id=class_obj.id) }}" class="btn btn-outline-primary">
+                    <i class="bi bi-people"></i> View Students
+                </a>
+                <a href="{{ url_for('schedule.class_schedule', class_id=class_obj.id) }}" class="btn btn-outline-primary">
+                    <i class="bi bi-calendar"></i> Schedule
+                </a>
+                <a href="{{ url_for('attendance.class_attendance', class_id=class_obj.id) }}" class="btn btn-outline-primary">
+                    <i class="bi bi-check2-square"></i> Attendance
+                </a>
+                {% if current_user.can_manage_class() %}
+                <a href="{{ url_for('finance.class_finance', class_id=class_obj.id) }}" class="btn btn-outline-primary">
+                    <i class="bi bi-cash-stack"></i> Finance
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Lessons -->
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Lessons</h5>
+        </div>
+        <div class="card-body">
+            {% if recent_lessons %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Location</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in recent_lessons %}
+                        <tr>
+                            <td>{{ lesson.subject }}</td>
+                            <td>{{ lesson.date.strftime('%b %d, %Y') }}</td>
+                            <td>{{ lesson.start_time.strftime('%H:%M') }} - {{ lesson.end_time.strftime('%H:%M') }}</td>
+                            <td>{{ lesson.location or '-' }}</td>
+                            <td>
+                                <a href="{{ url_for('schedule.view_lesson', lesson_id=lesson.id) }}" class="btn btn-sm btn-outline-primary">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-3">No lessons yet</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

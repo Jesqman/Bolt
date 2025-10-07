@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Complete Registration - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Complete Your Registration</h2>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Welcome, {{ pending_user.full_name }}! Please select your role to continue.
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Email</label>
+                            <input type="email" class="form-control" value="{{ pending_user.email }}" disabled>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select Your Role</label>
+                            <select name="role" class="form-select" required>
+                                <option value="">Choose a role...</option>
+                                <option value="teacher">Teacher</option>
+                                <option value="student">Student</option>
+                                <option value="starosta">Starosta (Class Leader)</option>
+                            </select>
+                            <small class="text-muted">You can be invited to a class after registration</small>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Complete Registration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

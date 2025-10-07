@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Starosta Dashboard - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="mb-3">
+                <i class="bi bi-star-fill text-warning"></i> Starosta Dashboard
+            </h1>
+            <p class="text-muted">Welcome back, {{ current_user.full_name }}!</p>
+        </div>
+    </div>
+    
+    {% if not class_obj %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> You are not assigned to any class yet. Please contact your teacher.
+    </div>
+    {% else %}
+    
+    <!-- Class Info -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5><i class="bi bi-people-fill"></i> {{ class_obj.name }}</h5>
+                    <p class="text-muted mb-0">{{ class_obj.get_student_count() }} students | Academic Year: {{ class_obj.academic_year }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <a href="{{ url_for('schedule.create_lesson', class_id=class_obj.id) }}" class="card text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="bi bi-plus-circle text-primary" style="font-size: 2rem;"></i>
+                    <h6 class="mt-2">Add Lesson</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('attendance.class_attendance', class_id=class_obj.id) }}" class="card text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="bi bi-check2-square text-success" style="font-size: 2rem;"></i>
+                    <h6 class="mt-2">Mark Attendance</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('finance.create_collection', class_id=class_obj.id) }}" class="card text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="bi bi-cash-stack text-info" style="font-size: 2rem;"></i>
+                    <h6 class="mt-2">New Collection</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('classes.students', class_id=class_obj.id) }}" class="card text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="bi bi-people text-warning" style="font-size: 2rem;"></i>
+                    <h6 class="mt-2">View Students</h6>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Upcoming Lessons -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Upcoming Lessons</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_lessons %}
+                    <div class="list-group list-group-flush">
+                        {% for lesson in upcoming_lessons %}
+                        <a href="{{ url_for('attendance.lesson_attendance', lesson_id=lesson.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ lesson.subject }}</h6>
+                                <small>{{ lesson.date.strftime('%b %d') }}</small>
+                            </div>
+                            <small><i class="bi bi-clock"></i> {{ lesson.start_time.strftime('%H:%M') }} - {{ lesson.end_time.strftime('%H:%M') }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">No upcoming lessons</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Active Collections -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-cash-stack"></i> Active Collections</h5>
+                </div>
+                <div class="card-body">
+                    {% if collections %}
+                    <div class="list-group list-group-flush">
+                        {% for collection in collections %}
+                        <a href="{{ url_for('finance.view_collection', collection_id=collection.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ collection.name }}</h6>
+                                <span class="badge bg-info">${{ collection.amount_per_student }}</span>
+                            </div>
+                            {% set status = collection.get_payment_status() %}
+                            <small class="text-muted">{{ status.paid }}/{{ status.total_students }} paid</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">No active collections</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+{% endblock %}

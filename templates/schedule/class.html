@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Schedule - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-calendar-fill"></i> Schedule - {{ class_obj.name }}</h1>
+            <p class="text-muted">Week of {{ start_of_week.strftime('%B %d') }} - {{ end_of_week.strftime('%B %d, %Y') }}</p>
+        </div>
+        {% if current_user.can_manage_class() %}
+        <div class="col-auto">
+            <a href="{{ url_for('schedule.create_lesson', class_id=class_obj.id) }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add Lesson
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Week Navigation -->
+    <div class="mb-4">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('schedule.class_schedule', class_id=class_obj.id, week=week_offset-1) }}" class="btn btn-outline-primary">
+                <i class="bi bi-chevron-left"></i> Previous Week
+            </a>
+            <a href="{{ url_for('schedule.class_schedule', class_id=class_obj.id, week=0) }}" class="btn btn-outline-primary">
+                This Week
+            </a>
+            <a href="{{ url_for('schedule.class_schedule', class_id=class_obj.id, week=week_offset+1) }}" class="btn btn-outline-primary">
+                Next Week <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Weekly Schedule -->
+    <div class="row">
+        {% for day, lessons in week_schedule.items() %}
+        <div class="col-md-12 mb-3">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">{{ day.strftime('%A, %B %d') }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if lessons %}
+                    <div class="list-group">
+                        {% for lesson in lessons %}
+                        <a href="{{ url_for('schedule.view_lesson', lesson_id=lesson.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ lesson.subject }}</h6>
+                                <small>{{ lesson.start_time.strftime('%H:%M') }} - {{ lesson.end_time.strftime('%H:%M') }}</small>
+                            </div>
+                            {% if lesson.location or lesson.description %}
+                            <p class="mb-1 text-muted">
+                                {% if lesson.location %}<i class="bi bi-geo-alt"></i> {{ lesson.location }}{% endif %}
+                                {% if lesson.description %}| {{ lesson.description }}{% endif %}
+                            </p>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">No lessons scheduled</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher Dashboard - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="mb-3">
+                <i class="bi bi-speedometer2"></i> Teacher Dashboard
+            </h1>
+            <p class="text-muted">Welcome back, {{ current_user.full_name }}!</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('classes.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create New Class
+            </a>
+        </div>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3 class="text-primary">{{ classes|length }}</h3>
+                <p>Active Classes</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3 class="text-success">{{ total_students }}</h3>
+                <p>Total Students</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3 class="text-info">{{ total_lessons }}</h3>
+                <p>Total Lessons</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Upcoming Lessons -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-calendar-event"></i> Upcoming Lessons</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_lessons %}
+                    <div class="list-group list-group-flush">
+                        {% for lesson in upcoming_lessons %}
+                        <a href="{{ url_for('schedule.view_lesson', lesson_id=lesson.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ lesson.subject }}</h6>
+                                <small class="text-muted">{{ lesson.date.strftime('%b %d, %Y') }}</small>
+                            </div>
+                            <p class="mb-1">
+                                <i class="bi bi-clock"></i> {{ lesson.start_time.strftime('%H:%M') }} - {{ lesson.end_time.strftime('%H:%M') }}
+                                <span class="ms-3"><i class="bi bi-people"></i> {{ lesson.class_obj.name }}</span>
+                                {% if lesson.location %}
+                                <span class="ms-3"><i class="bi bi-geo-alt"></i> {{ lesson.location }}</span>
+                                {% endif %}
+                            </p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-4">No upcoming lessons scheduled</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Classes -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-people"></i> My Classes</h5>
+                </div>
+                <div class="card-body">
+                    {% if classes %}
+                    <div class="list-group list-group-flush">
+                        {% for class in classes %}
+                        <a href="{{ url_for('classes.view', class_id=class.id) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ class.name }}</h6>
+                                <span class="badge bg-primary">{{ class.get_student_count() }}</span>
+                            </div>
+                            <small class="text-muted">{{ class.academic_year }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">No classes yet</p>
+                    <a href="{{ url_for('classes.create') }}" class="btn btn-primary w-100">Create First Class</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

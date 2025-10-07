@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance - {{ class_obj.name }} - ClassHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-check2-square"></i> Attendance - {{ class_obj.name }}</h1>
+            <p class="text-muted">Recent lessons (last 30 days)</p>
+        </div>
+        {% if current_user.can_manage_class() %}
+        <div class="col-auto">
+            <a href="{{ url_for('attendance.export_class_attendance', class_id=class_obj.id) }}" class="btn btn-success">
+                <i class="bi bi-download"></i> Export CSV
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if lessons %}
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Subject</th>
+                            <th>Time</th>
+                            <th>Present</th>
+                            <th>Late</th>
+                            <th>Absent</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in lessons %}
+                        {% set stats = lesson.get_attendance_count() %}
+                        <tr>
+                            <td>{{ lesson.date.strftime('%b %d, %Y') }}</td>
+                            <td>{{ lesson.subject }}</td>
+                            <td>{{ lesson.start_time.strftime('%H:%M') }}</td>
+                            <td><span class="badge bg-success">{{ stats.present }}</span></td>
+                            <td><span class="badge bg-warning">{{ stats.late }}</span></td>
+                            <td><span class="badge bg-danger">{{ stats.absent }}</span></td>
+                            <td>
+                                <a href="{{ url_for('attendance.lesson_attendance', lesson_id=lesson.id) }}" class="btn btn-sm btn-outline-primary">
+                                    {% if current_user.can_manage_class() %}
+                                    Mark Attendance
+                                    {% else %}
+                                    View
+                                    {% endif %}
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-calendar-x" style="font-size: 4rem; color: #ccc;"></i>
+        <h4 class="mt-3">No lessons in the past 30 days</h4>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
